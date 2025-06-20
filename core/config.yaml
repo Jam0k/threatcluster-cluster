@@ -1,0 +1,131 @@
+# ThreatCluster Configuration
+# All configuration in one place for easy tuning
+
+# Processing Configuration
+processing:
+  fetch_interval_minutes: 10
+  max_articles_per_feed: 100
+  max_workers: 10
+  batch_size: 50
+  progress_update_interval: 20
+  days_to_look_back: 14
+
+# Security Filtering
+security_filtering:
+  enabled: true
+  min_security_score: 0.20  # Further lowered for broader inclusion
+  
+# Clustering Configuration  
+clustering:
+  # Time windows (hours)
+  event_window_hours: 72
+  flexible_time_windows:
+    same_cve: 168        # 7 days
+    same_ransomware: 168
+    same_victim: 168
+    same_malware: 168
+    same_apt: 168
+    same_product: 168
+  
+  # Similarity thresholds
+  semantic_similarity_threshold: 0.74
+  entity_overlap_threshold: 0.55
+  semantic_similarity_with_entities: 0.65
+  
+  # Cluster constraints
+  min_shared_entities: 2
+  max_cluster_size: 5
+  
+  # Score weights
+  semantic_weight: 0.6
+  entity_weight: 0.4
+
+# Entity Configuration
+entities:
+  # Promotion thresholds (occurrences needed)
+  promotion_thresholds:
+    ransomware_group: 5
+    apt_group: 5
+    malware_family: 8
+    company: 15
+    other: 10
+  
+  # Entity type weights for ranking
+  weights:
+    apt_group: 100
+    ransomware_group: 95
+    cve: 80
+    malware_family: 70
+    mitre_technique: 50
+    mitre_tactic: 45
+    other: 80  # Victim organizations
+    company: 20
+    industry: 35
+    attack_type: 55
+    ip_address: 30
+    domain: 30
+    url: 25
+    email: 20
+    file_path: 20
+    file_hash: 25
+
+# Source Credibility Multipliers
+source_credibility:
+  # Official sources
+  cisa: 1.5
+  cert: 1.4
+  nist: 1.4
+  mitre: 1.4
+  sans: 1.3
+  us-cert: 1.4
+  
+  # Security vendors
+  microsoft: 1.3
+  google: 1.3
+  cisco: 1.3
+  palo_alto: 1.2
+  crowdstrike: 1.2
+  mandiant: 1.2
+  fireeye: 1.2
+  kaspersky: 1.1
+  symantec: 1.1
+  sophos: 1.1
+  
+  # News sources
+  bleepingcomputer: 1.2
+  krebsonsecurity: 1.3
+  dark_reading: 1.2
+  the_hacker_news: 1.1
+  securityweek: 1.1
+  threatpost: 1.1
+  
+  # Default
+  default: 0.8
+
+# Model Configuration
+models:
+  embedding_model: "BAAI/bge-large-en-v1.5"
+  fallback_model: "all-MiniLM-L6-v2"
+  device: "auto"  # auto, cuda, or cpu
+  cache_embeddings: true
+
+# Database Configuration
+database:
+  connection_pool_size: 10
+  max_overflow: 20
+  pool_timeout: 30
+  pool_recycle: 3600
+
+# Network Configuration  
+network:
+  feed_timeout: 30
+  request_timeout: 10
+  max_retries: 3
+  user_agent: "ThreatCluster/2.0"
+
+# Logging Configuration
+logging:
+  level: "INFO"
+  rotation: "25 MB"
+  retention: 10
+  format: "{time:YYYY-MM-DD HH:mm:ss} | {level} | {message}"

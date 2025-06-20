@@ -1,0 +1,159 @@
+# IOC Feed Configuration
+# Custom feeds from CriticalPathSecurity and other sources
+
+feeds:
+  # CriticalPathSecurity Zeek Intelligence Feeds
+  - name: "ThreatFox IPs"
+    url: "https://raw.githubusercontent.com/CriticalPathSecurity/Zeek-Intelligence-Feeds/refs/heads/master/abuse-ch-threatfox-ip.intel"
+    type: "ip_address"
+    format: "zeek_intel"
+    active: true
+    description: "ThreatFox malicious IPs from abuse.ch"
+    
+  - name: "TweetFeed IPs"
+    url: "https://raw.githubusercontent.com/CriticalPathSecurity/Zeek-Intelligence-Feeds/refs/heads/master/tweetfeed.intel"
+    type: "ip_address"
+    format: "zeek_intel"
+    active: true
+    description: "Malicious IPs from Twitter threat feeds"
+    
+  - name: "TOR Exit Nodes"
+    url: "https://raw.githubusercontent.com/CriticalPathSecurity/Zeek-Intelligence-Feeds/refs/heads/master/tor-exit.intel"
+    type: "ip_address"
+    format: "zeek_intel"
+    active: true
+    description: "Known TOR exit node IPs"
+    
+  - name: "SANS Intel IPs"
+    url: "https://raw.githubusercontent.com/CriticalPathSecurity/Zeek-Intelligence-Feeds/refs/heads/master/sans.intel"
+    type: "ip_address"
+    format: "zeek_intel"
+    active: true
+    description: "SANS Internet Storm Center malicious IPs"
+    
+  - name: "Compromised IPs - Emerging Threats"
+    url: "https://raw.githubusercontent.com/CriticalPathSecurity/Zeek-Intelligence-Feeds/refs/heads/master/compromised-ips.intel"
+    type: "ip_address"
+    format: "zeek_intel"
+    active: true
+    description: "Compromised IPs from Emerging Threats"
+    
+  - name: "Cobalt Strike IPs"
+    url: "https://raw.githubusercontent.com/CriticalPathSecurity/Zeek-Intelligence-Feeds/refs/heads/master/cobaltstrike_ips.intel"
+    type: "ip_address"
+    format: "zeek_intel"
+    active: true
+    description: "Known Cobalt Strike C2 server IPs"
+    
+  - name: "AlienVault Bad Reputation IPs"
+    url: "https://raw.githubusercontent.com/CriticalPathSecurity/Zeek-Intelligence-Feeds/refs/heads/master/alienvault.intel"
+    type: "ip_address"
+    format: "zeek_intel"
+    active: true
+    description: "Bad reputation IPs from AlienVault"
+    
+  # IPsum Feed
+  - name: "IPsum Level 3"
+    url: "https://raw.githubusercontent.com/stamparm/ipsum/refs/heads/master/levels/3.txt"
+    type: "ip_address"
+    format: "plain"
+    active: true
+    description: "IPsum threat level 3 IPs (high confidence malicious)"
+    
+  # Malicious Hash Feeds
+  - name: "Malicious SHA256 Hashes"
+    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-hash/refs/heads/main/full-hash-sha256-aa.txt"
+    type: "file_hash"
+    format: "plain"
+    active: true
+    description: "Known malicious SHA256 file hashes"
+    
+  - name: "Malicious MD5 Hashes"
+    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-hash/refs/heads/main/full-hash-md5-aa.txt"
+    type: "file_hash"
+    format: "plain"
+    active: true
+    description: "Known malicious MD5 file hashes"
+    
+  - name: "Malicious SHA1 Hashes"
+    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-hash/refs/heads/main/full-hash-sha1-aa.txt"
+    type: "file_hash"
+    format: "plain"
+    active: true
+    description: "Known malicious SHA1 file hashes"
+    
+  - name: "Abuse.ch Malware Hashes"
+    url: "https://raw.githubusercontent.com/CriticalPathSecurity/Zeek-Intelligence-Feeds/refs/heads/master/abuse-ch-malware.intel"
+    type: "file_hash"
+    format: "zeek_intel"
+    active: true
+    description: "Malware hashes from abuse.ch"
+    
+  # Domain Feeds
+  - name: "Amnesty NSO Domains"
+    url: "https://raw.githubusercontent.com/CriticalPathSecurity/Zeek-Intelligence-Feeds/refs/heads/master/Amnesty_NSO_Domains.intel"
+    type: "domain"
+    format: "zeek_intel"
+    active: true
+    description: "NSO Group Pegasus spyware domains"
+    
+  - name: "AlienVault Cobalt Strike Domains"
+    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/refs/heads/main/sources/alienvault-cobalt-strike"
+    type: "domain"
+    format: "plain"
+    active: true
+    description: "Cobalt Strike C2 domains from AlienVault"
+    
+  - name: "AlienVault Banking Phishing"
+    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/refs/heads/main/sources/alienvault-banking-phishtank"
+    type: "domain"
+    format: "plain"
+    active: true
+    description: "Banking phishing domains from AlienVault"
+    
+  - name: "AlienVault Fake Microsoft"
+    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/refs/heads/main/sources/alienvault-microsoft-phishtank"
+    type: "domain"
+    format: "plain"
+    active: true
+    description: "Fake Microsoft phishing domains"
+    
+  - name: "AlienVault Fake PayPal"
+    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/refs/heads/main/sources/alienvault-paypal-phishtank"
+    type: "domain"
+    format: "plain"
+    active: true
+    description: "Fake PayPal phishing domains"
+    
+  - name: "AlienVault Phishing Scams"
+    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/refs/heads/main/sources/alienvault-phishing-scam"
+    type: "domain"
+    format: "plain"
+    active: true
+    description: "General phishing scam domains"
+    
+  - name: "MalwareBytes Domains"
+    url: "https://raw.githubusercontent.com/romainmarcoux/malicious-domains/refs/heads/main/sources/malwarebytes.com.txt"
+    type: "domain"
+    format: "plain"
+    active: true
+    description: "Malicious domains from MalwareBytes"
+
+# Processing settings
+settings:
+  user_agent: "ThreatCluster-IOC-Ingester/1.0"
+  timeout: 30  # seconds
+  max_retries: 3
+  batch_size: 1000  # Database insert batch size
+  
+# Schedule settings (for cron/scheduler)
+schedule:
+  enabled: true
+  interval: "daily"  # daily, hourly, weekly
+  time: "03:00"  # UTC time for daily runs
+  
+# Data retention
+retention:
+  enabled: true
+  max_age_days: 90  # Remove IOCs not seen in feeds for 90 days
+  min_occurrence: 2  # Keep IOCs seen at least twice

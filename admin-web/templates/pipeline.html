@@ -1,0 +1,444 @@
+{% extends "base.html" %}
+
+{% block title %}Pipeline Control - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="p-6 lg:p-8">
+    <div class="mb-8">
+        <h1 class="text-2xl font-bold text-tc-text-primary">Pipeline Control</h1>
+        <p class="text-sm text-tc-text-tertiary mt-1">Run and monitor the ThreatCluster data processing pipeline</p>
+    </div>
+    
+    <!-- Active Tasks -->
+    {% if active_tasks %}
+    <div class="tc-alert tc-alert-warning mb-6">
+        <svg class="w-5 h-5 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+        </svg>
+        <span>{{ active_tasks|length }} active task(s) running</span>
+    </div>
+    {% endif %}
+    
+    <!-- Pipeline Controls -->
+    <div class="grid grid-cols-1 gap-6 lg:grid-cols-2 mb-8">
+        <!-- Full Pipeline -->
+        <div class="tc-card">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-tc-text-primary mb-4">Full Pipeline</h3>
+                <p class="text-sm text-tc-text-secondary mb-6">
+                    Run the complete pipeline: feeds → clustering → entities → ranking
+                </p>
+                <button onclick="runPipeline('full')" class="tc-button tc-button-primary w-full">
+                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    Run Full Pipeline
+                </button>
+            </div>
+        </div>
+        
+        <!-- Individual Stages -->
+        <div class="tc-card">
+            <div class="p-6">
+                <h3 class="text-lg font-semibold text-tc-text-primary mb-4">Individual Stages</h3>
+                <div class="space-y-3">
+                    <button onclick="runPipeline('feeds')" class="tc-button tc-button-secondary w-full">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 5c7.18 0 13 5.82 13 13M6 11a7 7 0 017 7m-6 0a1 1 0 11-2 0 1 1 0 012 0z"></path>
+                        </svg>
+                        Collect Feeds
+                    </button>
+                    <button onclick="runPipeline('cluster')" class="tc-button tc-button-secondary w-full">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 5a1 1 0 011-1h14a1 1 0 011 1v2a1 1 0 01-1 1H5a1 1 0 01-1-1V5zM4 13a1 1 0 011-1h6a1 1 0 011 1v6a1 1 0 01-1 1H5a1 1 0 01-1-1v-6zM16 13a1 1 0 011-1h2a1 1 0 011 1v6a1 1 0 01-1 1h-2a1 1 0 01-1-1v-6z"></path>
+                        </svg>
+                        Cluster Articles
+                    </button>
+                    <button onclick="runPipeline('entities')" class="tc-button tc-button-secondary w-full">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                        </svg>
+                        Refresh Entities
+                    </button>
+                    <button onclick="runPipeline('rank')" class="tc-button tc-button-secondary w-full">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4h13M3 8h9m-9 4h6m4 0l4-4m0 0l4 4m-4-4v12"></path>
+                        </svg>
+                        Update Rankings
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Task Progress -->
+    <div id="task-progress" class="space-y-6">
+        <!-- Active Tasks List -->
+        <div id="active-tasks-container" class="hidden">
+            <h3 class="text-lg font-semibold text-tc-text-primary mb-4">Active Tasks</h3>
+            <div id="active-tasks-list" class="space-y-4">
+                <!-- Active tasks will be listed here -->
+            </div>
+        </div>
+        
+        <!-- Current Task Details -->
+        <div id="current-task" class="hidden">
+            <div class="tc-card">
+                <div class="p-6">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-lg font-semibold text-tc-text-primary">Task Progress</h3>
+                        <button onclick="closeTaskView()" class="text-tc-text-tertiary hover:text-tc-text-primary">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                            </svg>
+                        </button>
+                    </div>
+                    <div id="progress-content">
+                        <!-- Progress will be displayed here -->
+                    </div>
+                    
+                    <!-- Log viewer -->
+                    <div class="mt-6">
+                        <div class="flex justify-between items-center mb-3">
+                            <h4 class="text-md font-medium text-tc-text-primary">Execution Logs</h4>
+                            <button onclick="clearLogs()" class="text-xs text-tc-text-tertiary hover:text-tc-text-primary">Clear</button>
+                        </div>
+                        <div id="log-viewer" class="bg-tc-bg-tertiary rounded-lg p-4 font-mono text-xs text-tc-text-secondary max-h-96 overflow-y-auto">
+                            <div class="text-tc-text-tertiary">Waiting for logs...</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let activeTasks = {};
+    let currentViewingTask = null;
+    
+    async function runPipeline(stage) {
+        const endpoint = stage === 'full' ? '/pipeline/run/full' : `/pipeline/run/${stage}`;
+        
+        // Disable the button to prevent double-clicks
+        const buttons = document.querySelectorAll('button');
+        buttons.forEach(btn => {
+            if (btn.textContent.includes('Run')) {
+                btn.disabled = true;
+            }
+        });
+        
+        try {
+            const response = await fetch(endpoint, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            
+            if (response.ok) {
+                const data = await response.json();
+                showToast(`${stage === 'full' ? 'Full pipeline' : stage} started successfully`, 'success');
+                
+                // Add task to active tasks
+                activeTasks[data.task_id] = {
+                    id: data.task_id,
+                    type: stage,
+                    status: 'starting',
+                    startTime: new Date()
+                };
+                
+                // Start monitoring this task
+                monitorTask(data.task_id);
+                
+                // Show the task immediately
+                showTask(data.task_id);
+                
+                // Update active tasks display
+                updateActiveTasksList();
+            } else {
+                const error = await response.json();
+                showToast(`Failed to start pipeline: ${error.detail}`, 'error');
+            }
+        } catch (error) {
+            showToast(`Error: ${error.message}`, 'error');
+        } finally {
+            // Re-enable buttons
+            setTimeout(() => {
+                buttons.forEach(btn => {
+                    if (btn.textContent.includes('Run')) {
+                        btn.disabled = false;
+                    }
+                });
+            }, 2000);
+        }
+    }
+    
+    function monitorTask(taskId) {
+        // Close existing event source for this task if any
+        if (activeTasks[taskId] && activeTasks[taskId].eventSource) {
+            activeTasks[taskId].eventSource.close();
+        }
+        
+        // Create new event source
+        const eventSource = new EventSource(`/pipeline/stream/${taskId}`);
+        activeTasks[taskId].eventSource = eventSource;
+        
+        eventSource.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            
+            // Update task info
+            activeTasks[taskId].status = data.status;
+            activeTasks[taskId].message = data.message;
+            
+            // If this is the currently viewing task, update the display
+            if (currentViewingTask === taskId) {
+                updateProgress(data);
+                
+                // Update logs
+                if (data.logs && data.logs.length > 0) {
+                    updateLogs(data.logs);
+                }
+            }
+            
+            // Update active tasks list
+            updateActiveTasksList();
+            
+            if (data.completed) {
+                eventSource.close();
+                activeTasks[taskId].eventSource = null;
+                activeTasks[taskId].completed = true;
+                activeTasks[taskId].endTime = new Date();
+                
+                if (data.status === 'completed') {
+                    showToast(`Task ${taskId.split('_')[0]} completed successfully`, 'success');
+                } else {
+                    showToast(`Task ${taskId.split('_')[0]} failed: ${data.error || 'Unknown error'}`, 'error');
+                }
+                
+                // Remove from active tasks after 30 seconds
+                setTimeout(() => {
+                    delete activeTasks[taskId];
+                    updateActiveTasksList();
+                    if (currentViewingTask === taskId && Object.keys(activeTasks).length === 0) {
+                        closeTaskView();
+                    }
+                }, 30000);
+            }
+        };
+        
+        eventSource.onerror = function(error) {
+            console.error('EventSource error:', error);
+            eventSource.close();
+            activeTasks[taskId].eventSource = null;
+            activeTasks[taskId].status = 'error';
+            updateActiveTasksList();
+        };
+    }
+    
+    function showTask(taskId) {
+        currentViewingTask = taskId;
+        document.getElementById('current-task').classList.remove('hidden');
+        
+        // Clear previous logs
+        document.getElementById('log-viewer').innerHTML = '<div class="text-tc-text-tertiary">Waiting for logs...</div>';
+    }
+    
+    function closeTaskView() {
+        currentViewingTask = null;
+        document.getElementById('current-task').classList.add('hidden');
+    }
+    
+    function updateActiveTasksList() {
+        const container = document.getElementById('active-tasks-container');
+        const list = document.getElementById('active-tasks-list');
+        
+        const taskCount = Object.keys(activeTasks).length;
+        
+        if (taskCount === 0) {
+            container.classList.add('hidden');
+            return;
+        }
+        
+        container.classList.remove('hidden');
+        
+        list.innerHTML = Object.values(activeTasks).map(task => {
+            let statusIcon = '';
+            let statusColor = '';
+            
+            switch(task.status) {
+                case 'running':
+                case 'starting':
+                    statusIcon = '<svg class="w-4 h-4 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>';
+                    statusColor = 'text-tc-info';
+                    break;
+                case 'completed':
+                    statusIcon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>';
+                    statusColor = 'text-tc-success';
+                    break;
+                case 'failed':
+                case 'error':
+                    statusIcon = '<svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>';
+                    statusColor = 'text-tc-error';
+                    break;
+            }
+            
+            const isActive = currentViewingTask === task.id;
+            
+            return `
+                <div class="tc-card p-4 cursor-pointer hover:bg-tc-bg-tertiary transition-colors ${isActive ? 'ring-2 ring-tc-primary' : ''}" onclick="showTask('${task.id}')">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="${statusColor}">
+                                ${statusIcon}
+                            </div>
+                            <div>
+                                <p class="font-medium text-tc-text-primary">${task.type === 'full' ? 'Full Pipeline' : task.type.charAt(0).toUpperCase() + task.type.slice(1)}</p>
+                                <p class="text-xs text-tc-text-tertiary">${task.message || 'Starting...'}</p>
+                            </div>
+                        </div>
+                        <div class="text-xs text-tc-text-tertiary">
+                            ${formatTime(task.startTime)}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+    }
+    
+    function formatTime(date) {
+        const now = new Date();
+        const diff = now - date;
+        const minutes = Math.floor(diff / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+        
+        if (minutes > 0) {
+            return `${minutes}m ${seconds}s ago`;
+        }
+        return `${seconds}s ago`;
+    }
+    
+    function clearLogs() {
+        document.getElementById('log-viewer').innerHTML = '<div class="text-tc-text-tertiary">Logs cleared</div>';
+    }
+    
+    function updateProgress(data) {
+        const progressContent = document.getElementById('progress-content');
+        
+        let statusIcon = '';
+        let statusColor = '';
+        let statusBg = '';
+        
+        switch(data.status) {
+            case 'running':
+                statusIcon = '<svg class="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>';
+                statusColor = 'text-tc-info';
+                statusBg = 'bg-tc-info';
+                break;
+            case 'completed':
+                statusIcon = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                statusColor = 'text-tc-success';
+                statusBg = 'bg-tc-success';
+                break;
+            case 'failed':
+                statusIcon = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                statusColor = 'text-tc-error';
+                statusBg = 'bg-tc-error';
+                break;
+            default:
+                statusIcon = '<svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>';
+                statusColor = 'text-tc-text-tertiary';
+                statusBg = 'bg-tc-text-tertiary';
+        }
+        
+        progressContent.innerHTML = `
+            <div class="flex items-center mb-4">
+                <div class="flex-shrink-0 ${statusColor}">
+                    ${statusIcon}
+                </div>
+                <div class="ml-4">
+                    <p class="text-lg font-medium ${statusColor}">${data.status.charAt(0).toUpperCase() + data.status.slice(1)}</p>
+                    <p class="text-sm text-tc-text-secondary">${data.message || ''}</p>
+                </div>
+            </div>
+            ${data.progress ? `
+            <div class="w-full bg-tc-bg-tertiary rounded-full h-2.5">
+                <div class="${statusBg} h-2.5 rounded-full transition-all duration-300" style="width: ${data.progress}%"></div>
+            </div>
+            ` : ''}
+        `;
+    }
+    
+    function updateLogs(logs) {
+        const logViewer = document.getElementById('log-viewer');
+        
+        // Clear initial message if present
+        if (logViewer.innerHTML.includes('Waiting for logs...')) {
+            logViewer.innerHTML = '';
+        }
+        
+        // Add new logs
+        logs.forEach(log => {
+            const logEntry = document.createElement('div');
+            logEntry.className = 'mb-1';
+            
+            let levelClass = 'text-tc-text-secondary';
+            switch(log.level) {
+                case 'ERROR':
+                    levelClass = 'text-tc-error';
+                    break;
+                case 'WARNING':
+                    levelClass = 'text-tc-warning';
+                    break;
+                case 'INFO':
+                    levelClass = 'text-tc-info';
+                    break;
+            }
+            
+            logEntry.innerHTML = `
+                <span class="text-tc-text-tertiary">${log.timestamp}</span>
+                <span class="${levelClass} ml-2">[${log.level}]</span>
+                <span class="ml-2">${log.message}</span>
+            `;
+            
+            logViewer.appendChild(logEntry);
+        });
+        
+        // Auto-scroll to bottom
+        logViewer.scrollTop = logViewer.scrollHeight;
+    }
+    
+    // Clean up on page unload
+    window.addEventListener('beforeunload', function() {
+        Object.values(activeTasks).forEach(task => {
+            if (task.eventSource) {
+                task.eventSource.close();
+            }
+        });
+    });
+    
+    // Check for active tasks on page load
+    window.addEventListener('DOMContentLoaded', async function() {
+        try {
+            // Check if there are any active tasks from the server
+            const response = await fetch('/pipeline/active');
+            if (response.ok) {
+                const tasks = await response.json();
+                tasks.forEach(taskId => {
+                    activeTasks[taskId] = {
+                        id: taskId,
+                        type: taskId.split('_')[0],
+                        status: 'running',
+                        startTime: new Date()
+                    };
+                    monitorTask(taskId);
+                });
+                updateActiveTasksList();
+            }
+        } catch (error) {
+            console.error('Failed to check active tasks:', error);
+        }
+    });
+</script>
+{% endblock %}

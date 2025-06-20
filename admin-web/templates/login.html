@@ -1,0 +1,58 @@
+{% extends "base.html" %}
+
+{% block title %}Login - {{ app_name }}{% endblock %}
+
+{% block content %}
+<div class="min-h-screen flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+        <div>
+            <div class="text-center">
+                <div class="flex justify-center mb-6">
+                    <svg class="w-20 h-20 text-tc-primary" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"></path>
+                    </svg>
+                </div>
+                <h2 class="text-3xl font-bold text-tc-text-primary">
+                    ThreatCluster Admin Panel
+                </h2>
+                <p class="mt-2 text-sm text-tc-text-tertiary">
+                    Sign in with your admin account
+                </p>
+            </div>
+        </div>
+        
+        <div class="tc-card p-8">
+            <div class="space-y-6">
+                <div class="text-center">
+                    <p class="text-sm text-tc-text-secondary mb-6">
+                        This area is restricted to administrators only.
+                    </p>
+                    
+                    <a href="/auth/login" class="tc-button tc-button-primary w-full justify-center">
+                        <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                        </svg>
+                        Sign in with Auth0
+                    </a>
+                </div>
+                
+                <div class="mt-6">
+                    <div class="relative">
+                        <div class="absolute inset-0 flex items-center">
+                            <div class="w-full border-t border-tc-border-primary"></div>
+                        </div>
+                        <div class="relative flex justify-center text-sm">
+                            <span class="px-2 bg-tc-bg-secondary text-tc-text-tertiary">Security Notice</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 text-xs text-tc-text-tertiary text-center space-y-1">
+                        <p>All access attempts are logged and monitored.</p>
+                        <p>Unauthorized access is prohibited.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,14 @@
+fastapi==0.104.1
+uvicorn[standard]==0.24.0
+python-jose[cryptography]==3.3.0
+authlib==1.2.1
+itsdangerous==2.1.2
+httpx==0.25.1
+jinja2==3.1.2
+python-multipart==0.0.6
+websockets==12.0
+sse-starlette==1.6.5
+aiofiles==23.2.1
+python-dotenv==1.0.0
+pydantic-settings==2.0.3
+apscheduler==3.10.4
